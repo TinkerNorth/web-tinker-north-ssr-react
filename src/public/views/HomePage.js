@@ -14,12 +14,11 @@ import Logo from './logo.png'
 class HomePage extends Component {  
   
   render() {
-    console.log(__dirname);
     return (
       <div>
         <Navbar bg="light" fixed="top">
           <Navbar.Brand>
-            <Link to='/'><Image height="25px"src={Logo} /></Link>
+            <Link to='/'><Image height="25px" src={Logo} /></Link>
           </Navbar.Brand>
         </Navbar>
         <ApplicationRouter />

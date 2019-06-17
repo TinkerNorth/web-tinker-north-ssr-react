@@ -43,7 +43,7 @@ const serverConfig = {
           {
             loader: 'file-loader',
             options: {
-              publicPath: 'static'
+              publicPath: '/static'
             },
           }
         ]
@@ -82,7 +82,7 @@ const clientConfig = {
           {
             loader: 'file-loader',
             options: {
-              publicPath: 'static'
+              publicPath: '/static'
             },
           }
         ]

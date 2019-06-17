@@ -11,38 +11,6 @@ import {
 import gql from "graphql-tag";
 import { Query } from 'react-apollo';
 
-const GET_ARTICLE = gql`
-query {
-  Article {
-    id
-    title
-    thumbnail{
-      title
-      url
-    }
-    description
-    body {
-      id
-      content_type
-      content {
-        node_type
-        value
-        marks {
-          type
-        }
-        content {
-          node_type
-          value
-          marks {
-            type
-          }
-        }
-      }
-    }
-  }
-}
-`;
-
 class ArticlePage extends Component {
   renderBlog(blog){
     return (
@@ -64,17 +32,18 @@ class ArticlePage extends Component {
 
   renderInnerRichParagraph(contentList) {
     var results = [];
-    for (var index = 0; index < contentList.length; index++) {
+    for (var index = 0; contentList && index < contentList.length; index++) {
       var contentItem = contentList[index];
 
-      
       if (contentItem.node_type === 'text') {    
         var value = contentItem.value;
         value = this.applyMarkings(contentItem, value);
   
         results.push(value);
-      } else if (contentItem.node_type === 'hyperlink') {        
-        results.push(<a href={contentItem.data.uri}>{this.renderInnerRichParagraph(contentItem.content)}</a>);
+      } else if (contentItem.node_type === 'hyperlink') {
+        if (contentItem.hyperlink && contentItem.hyperlink.uri){
+          results.push(<a href={contentItem.hyperlink.uri}>{this.renderInnerRichParagraph(contentItem.content)}</a>);
+        }
       } else if (contentItem.node_type === 'paragraph'){
         results.push(<p className="text-justify">{this.renderInnerRichParagraph(contentItem.content)}</p>);
       } else if (contentItem.node_type === 'heading-1'){
@@ -98,7 +67,7 @@ class ArticlePage extends Component {
       } else if (contentItem.node_type === 'list-item'){
         results.push(<li>{this.renderInnerRichParagraph(contentItem.content)}</li>);
       } else if (contentItem.node_type === 'embedded-asset-block'){
-        results.push(<p><Image src={contentItem.data.target.fields.file.url} width="100%"/></p>);
+        results.push(<p><Image src={contentItem.image.url} width="100%"/></p>);
       } else if (contentItem.node_type === 'embedded-entry-block') {
         console.log(contentItem);
         console.log(contentItem.node_type);
@@ -144,7 +113,7 @@ class ArticlePage extends Component {
 
 
     var bodyList = [];
-    for (var index = 0; index < state.body.length; index++) {
+    for (var index = 0; state.body && index < state.body.length; index++) {
       var bodyItem = state.body[index];
       var contentType = bodyItem.content_type;
       if (contentType === "blogArticleParagraph"){
@@ -154,7 +123,7 @@ class ArticlePage extends Component {
       } else if (contentType === "blogArticleSubtitle"){
         bodyList.push(<h3>{bodyItem.fields.subtitle}</h3>);
       } else if (contentType === "blogArticleImage"){
-        bodyList.push(<p><Image src={bodyItem.fields.image.fields.file.url} width="100%"/></p>);
+        bodyList.push(<p><Image src={bodyItem.image.url} width="100%"/></p>);
       } else {
         console.log(contentType);
       }
@@ -169,6 +138,55 @@ class ArticlePage extends Component {
   }
 
   render() {
+    const GET_ARTICLE = gql`
+      query {
+        Article(id: "${this.props.match.params.entityId}") {
+          id
+          title
+          thumbnail{
+            title
+            url
+          }
+          description
+          body {
+            id
+            content_type
+            image {
+              title
+              url
+            }
+            content {
+              image {
+                title
+                url
+              }
+              hyperlink {
+                uri
+              }
+              node_type
+              value
+              marks {
+                type
+              }
+              content {
+                image {
+                  title
+                  url
+                }
+                hyperlink {
+                  uri
+                }
+                node_type
+                value
+                marks {
+                  type
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
     return (
       <Query query={GET_ARTICLE}>
         {({ loading, error, data }) => {
